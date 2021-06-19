@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExponentialRetryAkkaActors", "ExponentialRetryAkkaActors\ExponentialRetryAkkaActors.csproj", "{971574D3-F05E-4F34-96BE-A5F10179E20C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExponentialRetryAkkaActors", "ExponentialRetryAkkaActors\ExponentialRetryAkkaActors.csproj", "{971574D3-F05E-4F34-96BE-A5F10179E20C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExponentialRetryAkkaActorsTests", "ExponentialRetryAkkaActorsTests\ExponentialRetryAkkaActorsTests.csproj", "{0AB21F32-1877-4FB6-826B-5D0A7520964C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{971574D3-F05E-4F34-96BE-A5F10179E20C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{971574D3-F05E-4F34-96BE-A5F10179E20C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{971574D3-F05E-4F34-96BE-A5F10179E20C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AB21F32-1877-4FB6-826B-5D0A7520964C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AB21F32-1877-4FB6-826B-5D0A7520964C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AB21F32-1877-4FB6-826B-5D0A7520964C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AB21F32-1877-4FB6-826B-5D0A7520964C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
