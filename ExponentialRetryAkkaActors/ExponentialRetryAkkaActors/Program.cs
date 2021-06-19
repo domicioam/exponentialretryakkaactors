@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Akka.Actor;
+using System;
 
 namespace ExponentialRetryAkkaActors
 {
@@ -6,7 +7,7 @@ namespace ExponentialRetryAkkaActors
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var actorSystem = ActorSystem.Create("ActorSystem");
         }
     }
 }
