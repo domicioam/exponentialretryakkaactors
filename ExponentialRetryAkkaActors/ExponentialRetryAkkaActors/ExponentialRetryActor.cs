@@ -9,16 +9,16 @@ using static Akka.Actor.Status;
 
 namespace ExponentialRetryAkkaActors
 {
-    public delegate void Work();
+    public delegate T Work<T>();
 
-    public class ExponentialRetryActor : ReceiveActor
+    public class ExponentialRetryActor<T> : ReceiveActor
     {
         #region Messages
         public class DoWork
         {
-            public Work Work { get; }
+            public Work<T> Work { get; }
 
-            public DoWork(Work work)
+            public DoWork(Work<T> work)
             {
                 Work = work;
             }
@@ -35,7 +35,7 @@ namespace ExponentialRetryAkkaActors
                 var supervisorProps = BackoffSupervisor.Props(
                     Backoff.OnFailure(
                         workerProps,
-                        childName: "myEcho",
+                        childName: "worker",
                         minBackoff: TimeSpan.FromSeconds(3),
                         maxBackoff: TimeSpan.FromSeconds(30),
                         randomFactor: 0.2,
@@ -62,9 +62,9 @@ namespace ExponentialRetryAkkaActors
 
         private class Worker : ReceiveActor
         {
-            private readonly Work work;
+            private readonly Work<T> work;
 
-            public Worker(Work work)
+            public Worker(Work<T> work)
             {
                 this.work = work;
             }
@@ -72,8 +72,8 @@ namespace ExponentialRetryAkkaActors
             protected override void PreStart()
             {
                 base.PreStart();
-                work();
-                Context.Parent.Tell(new Success(null));
+                var result = work();
+                Context.Parent.Tell(new Success(result));
             }
         }
     }
