@@ -25,6 +25,9 @@ namespace ExponentialRetryAkkaActors
         }
         #endregion
 
+        private IActorRef requestor;
+        private IActorRef supervisor;
+
         public ExponentialRetryActor()
         {
             Receive<DoWork>(msg =>
@@ -56,9 +59,6 @@ namespace ExponentialRetryAkkaActors
                 requestor.Tell(msg);
             });
         }
-
-        private IActorRef requestor;
-        private IActorRef supervisor;
 
         private class Worker : ReceiveActor
         {
