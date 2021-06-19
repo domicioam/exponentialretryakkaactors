@@ -2,7 +2,6 @@
 using Akka.TestKit.Xunit2;
 using ExponentialRetryAkkaActors;
 using System;
-using System.Diagnostics;
 using Xunit;
 using static Akka.Actor.Status;
 
