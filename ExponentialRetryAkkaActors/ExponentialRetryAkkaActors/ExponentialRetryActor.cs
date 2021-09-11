@@ -36,23 +36,28 @@ namespace ExponentialRetryAkkaActors
                         workerProps,
                         childName: "worker",
                         minBackoff: TimeSpan.FromSeconds(3),
-                        maxBackoff: TimeSpan.FromSeconds(30),
+                        maxBackoff: TimeSpan.FromSeconds(5),
                         randomFactor: 0.2,
-                        maxNrOfRetries: 10)
+                        maxNrOfRetries: 2) // maxNrOfRetries is being ignored for some reason
                         .WithSupervisorStrategy(new OneForOneStrategy(exception =>
                         {
                             if (exception is Exception)
                                 return Directive.Restart;
                             return Directive.Escalate;
-                        })));
-
+                        })
+                        .WithMaxNrOfRetries(2))); // must use because the parameter value ignored
                 supervisor = Context.ActorOf(supervisorProps, "supervisor");
+                Context.Watch(supervisor);
             });
 
             Receive<Success>(msg =>
             {
                 Context.Stop(supervisor);
                 requestor.Tell(msg);
+            });
+
+            Receive<Terminated>(msg => {
+                Context.Stop(Self);
             });
         }
 

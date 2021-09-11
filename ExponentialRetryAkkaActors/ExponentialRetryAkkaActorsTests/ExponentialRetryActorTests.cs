@@ -35,6 +35,18 @@ namespace ExponentialRetryAkkaActorsTests
             Assert.Equal("Hello world", msg.Status);
         }
 
+        [Fact]
+        public void Should_return_failure_after_tentatives_with_error()
+        {
+            // Given
+            var subject = Sys.ActorOf(Props.Create(() => new ExponentialRetryActor<string>()));
+            Watch(subject);
+            // When
+            subject.Tell(new ExponentialRetryActor<string>.DoWork(() => throw new Exception()));
+            // Then
+            ExpectMsg<Terminated>(TimeSpan.FromMinutes(10));
+        }
+
         private string Work()
         {
             if (shouldWork)
