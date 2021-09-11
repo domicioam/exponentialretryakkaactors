@@ -4,6 +4,7 @@ using ExponentialRetryAkkaActors;
 using System;
 using Xunit;
 using System.Collections.Generic;
+using static Akka.Actor.Status;
 
 namespace ExponentialRetryAkkaActorsTests
 {
@@ -13,9 +14,9 @@ namespace ExponentialRetryAkkaActorsTests
         public void Should_execute_sequence()
         {
             //Given
-            var sequence = new Queue<Action>();
-            sequence.Enqueue(() => Console.WriteLine("Job #1"));
-            sequence.Enqueue(() => Console.WriteLine("Job #2"));
+            var sequence = new Queue<Work<Status>>();
+            sequence.Enqueue(() => new Success(default));
+            sequence.Enqueue(() => new Success(default));
             var probe = CreateTestProbe();
             var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor()));
             //When
@@ -28,7 +29,7 @@ namespace ExponentialRetryAkkaActorsTests
         public void Should_receive_status_failure_when_sequence_empty()
         {
             //Given
-            var sequence = new Queue<Action>();
+            var sequence = new Queue<Work<Status>>();
             var probe = CreateTestProbe();
             var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor()));
             //When
@@ -41,15 +42,16 @@ namespace ExponentialRetryAkkaActorsTests
         public void Should_receive_status_failure_when_sequence_fails()
         {
             //Given
-            var sequence = new Queue<Action>();
-            sequence.Enqueue(() => Console.WriteLine("Job #1"));
+            var sequence = new Queue<Work<Status>>();
+            sequence.Enqueue(() => new Success(default));
             sequence.Enqueue(() => throw new Exception());
             var probe = CreateTestProbe();
             var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor()));
+            Watch(sequenceActor);
             //When
             sequenceActor.Tell(sequence);
             //Then
-            ExpectMsg<Status.Failure>();
+            ExpectMsg<Terminated>(TimeSpan.FromMinutes(1));
         }
     }
 }

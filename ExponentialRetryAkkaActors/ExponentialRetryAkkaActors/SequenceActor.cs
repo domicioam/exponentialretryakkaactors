@@ -1,25 +1,28 @@
 using Akka.Actor;
 using System.Collections.Generic;
 using System;
+using static Akka.Actor.Status;
 
 namespace ExponentialRetryAkkaActors
 {
     public class SequenceActor : ReceiveActor
     {
         #region Messages
-        private record Execute(Action Action);
+        private record Execute(Work<Status> Action);
         #endregion
 
-        private Queue<Action> queue;
+        private Queue<Work<Status>> queue;
         private IActorRef requestor;
 
         public SequenceActor()
         {
             Receive<Execute>(HandleExecute);
-            Receive<Queue<Action>>(HandleSequence);
+            Receive<Queue<Work<Status>>>(HandleSequence);
+            Receive<Success>(_ => HandleExecuteSuccess());
+            Receive<Terminated>(_ => Context.Stop(Self));
         }
 
-        private void HandleSequence(Queue<Action> queue) {
+        private void HandleSequence(Queue<Work<Status>> queue) {
             if(queue.Count == 0)
                 Sender.Tell(new Status.Failure(new ArgumentException("Sequence is empty")));
 
@@ -29,8 +32,13 @@ namespace ExponentialRetryAkkaActors
         }
 
         private void HandleExecute(Execute execute) {
-            execute.Action(); // Danger
-            if(queue.TryDequeue(out Action next))
+            var retryActor = Context.ActorOf(Props.Create(() => new ExponentialRetryActor<Status>()));
+            retryActor.Tell(new ExponentialRetryActor<Status>.DoWork(execute.Action)); // Danger
+            Context.Watch(retryActor);
+        }
+
+        private void HandleExecuteSuccess() {
+            if(queue.TryDequeue(out Work<Status> next))
                 Self.Tell(new Execute(next));
             else
                 requestor.Tell(new Status.Success(default));

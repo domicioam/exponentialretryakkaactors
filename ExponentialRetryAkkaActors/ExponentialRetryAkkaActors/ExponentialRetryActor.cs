@@ -10,15 +10,7 @@ namespace ExponentialRetryAkkaActors
     public class ExponentialRetryActor<T> : ReceiveActor
     {
         #region Messages
-        public class DoWork
-        {
-            public Work<T> Work { get; }
-
-            public DoWork(Work<T> work)
-            {
-                Work = work;
-            }
-        }
+        public record DoWork(Work<T> Work);
         #endregion
 
         private IActorRef requestor;
