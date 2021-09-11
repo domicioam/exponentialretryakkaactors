@@ -44,7 +44,7 @@ namespace ExponentialRetryAkkaActorsTests
             // When
             subject.Tell(new ExponentialRetryActor<string>.DoWork(() => throw new Exception()));
             // Then
-            ExpectMsg<Terminated>(TimeSpan.FromMinutes(10));
+            ExpectTerminated(subject, TimeSpan.FromSeconds(30));
         }
 
         private string Work()

@@ -1,6 +1,7 @@
 using Akka.Actor;
 using System.Collections.Generic;
 using System;
+using Akka.Pattern;
 using static Akka.Actor.Status;
 
 namespace ExponentialRetryAkkaActors
@@ -9,17 +10,23 @@ namespace ExponentialRetryAkkaActors
     {
         #region Messages
         private record Execute(Work<Status> Action);
+        public record SequenceFailed(string Reason);
         #endregion
 
         private Queue<Work<Status>> queue;
         private IActorRef requestor;
+        private Timeout timeout;
 
-        public SequenceActor()
+        public SequenceActor(Timeout timeout)
         {
+            this.timeout = timeout;
             Receive<Execute>(HandleExecute);
             Receive<Queue<Work<Status>>>(HandleSequence);
             Receive<Success>(_ => HandleExecuteSuccess());
-            Receive<Terminated>(_ => Context.Stop(Self));
+            Receive<ReceiveTimeout>(msg => {
+                SetReceiveTimeout(null);
+                requestor.Tell(new SequenceFailed("Timeout"));
+            });
         }
 
         private void HandleSequence(Queue<Work<Status>> queue) {
@@ -34,14 +41,17 @@ namespace ExponentialRetryAkkaActors
         private void HandleExecute(Execute execute) {
             var retryActor = Context.ActorOf(Props.Create(() => new ExponentialRetryActor<Status>()));
             retryActor.Tell(new ExponentialRetryActor<Status>.DoWork(execute.Action)); // Danger
-            Context.Watch(retryActor);
+            SetReceiveTimeout(timeout.value);
         }
 
         private void HandleExecuteSuccess() {
-            if(queue.TryDequeue(out Work<Status> next))
+            if(queue.TryDequeue(out Work<Status> next)) {
                 Self.Tell(new Execute(next));
-            else
+            }
+            else {
+                SetReceiveTimeout(null);
                 requestor.Tell(new Status.Success(default));
+            }
         }
     }
 }

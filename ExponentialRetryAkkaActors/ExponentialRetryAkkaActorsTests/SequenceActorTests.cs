@@ -18,7 +18,7 @@ namespace ExponentialRetryAkkaActorsTests
             sequence.Enqueue(() => new Success(default));
             sequence.Enqueue(() => new Success(default));
             var probe = CreateTestProbe();
-            var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor()));
+            var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor(new Timeout(TimeSpan.FromSeconds(3)))));
             //When
             sequenceActor.Tell(sequence);
             //Then
@@ -31,7 +31,7 @@ namespace ExponentialRetryAkkaActorsTests
             //Given
             var sequence = new Queue<Work<Status>>();
             var probe = CreateTestProbe();
-            var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor()));
+            var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor(new Timeout(TimeSpan.FromSeconds(3)))));
             //When
             sequenceActor.Tell(sequence);
             //Then
@@ -46,12 +46,12 @@ namespace ExponentialRetryAkkaActorsTests
             sequence.Enqueue(() => new Success(default));
             sequence.Enqueue(() => throw new Exception());
             var probe = CreateTestProbe();
-            var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor()));
+            var sequenceActor = Sys.ActorOf(Props.Create(() => new SequenceActor(new Timeout(TimeSpan.FromSeconds(3)))));
             Watch(sequenceActor);
             //When
             sequenceActor.Tell(sequence);
             //Then
-            ExpectMsg<Terminated>(TimeSpan.FromMinutes(1));
+            ExpectMsg<SequenceActor.SequenceFailed>(TimeSpan.FromSeconds(10));
         }
     }
 }
