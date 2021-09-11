@@ -44,7 +44,7 @@ namespace ExponentialRetryAkkaActorsTests
             else
             {
                 shouldWork = true;
-                throw new Exception();
+                throw new Exception("Hello error!");
             }
         }
     }
